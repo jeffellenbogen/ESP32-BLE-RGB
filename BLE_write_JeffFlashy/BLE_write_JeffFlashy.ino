@@ -23,9 +23,9 @@
 typedef enum{LEDoff, LEDon, LEDflash} LEDmodeType;
 int flashLength = 50;
 
-int redValue = 50;
-int greenValue = 5;
-int blueValue = 155;
+int redValue = 75;
+int greenValue = 0;
+int blueValue = 230;
 
 int freq =5000;
 int ledChannelRed = 0;
@@ -292,17 +292,30 @@ void loop() {
 
 int setColorInitValue(int colorInitValue, uint8_t outputArray[])
 {
-  int colorDigits = 1;
-  outputArray[2]=colorInitValue%10+'0';
-  if (colorInitValue >= 10)
+  int arrayIndex = 0;
+
+  if ((colorInitValue < 0) || (colorInitValue > 255)) // check for improper R,G, or B colorValues
   {
-    outputArray[1]=(colorInitValue%100)/10+'0';  
-    colorDigits++; 
+    Serial.println("colorInitValue ERROR!");
+    return -1;
   }
-  if (colorInitValue >= 100)
+  
+  if (colorInitValue >= 100) // we have a 3 digit color value
   {
-   outputArray[0]=colorInitValue/100+'0'; 
-   colorDigits++;
+    outputArray[arrayIndex]=colorInitValue/100+'0'; // put the first digit into array[0]
+
+    arrayIndex++;
   }
-  return colorDigits;
+  
+  if (colorInitValue >= 10) // we have either a 3 or 2 digit color value
+  {
+    outputArray[arrayIndex]=(colorInitValue%100)/10+'0';  // put the tens digit in either array[0] (2 digit color) or array[1] (3 digit color)
+
+    arrayIndex++;
+  } 
+
+  outputArray[arrayIndex]=colorInitValue%10+'0'; // we have either a 3 or 2 or 1 digit color value and we are putting the ones digit in the appropriate slot
+  // of the array. one digit goes in array[0] (1 digit color), array[1] (2 digit color), array[2] (3 digit color)
+  
+  return arrayIndex + 1; // arrayIndex + 1 = number of digits of the colorValue (one more than the arrayIndex)
 }
